@@ -61,4 +61,127 @@ public class NeighborhoodLibrary {
         }
     }
 
-   }
+    private static void showAvailableBooks() {
+        System.out.println(" Available books:");
+
+        int availableCount = 0;
+        for (Book book : inventory) {
+            if (!book.isCheckedOut()) {
+                System.out.printf("%d. [ISBN: %s] %s\n",
+                        book.getId(), book.getIsbn(), book.getTitle());
+                availableCount++;
+            }
+        }
+
+        System.out.println("\nAvailable: " + availableCount);
+
+        if (availableCount == 0) {
+            System.out.println("На жаль, всі книги взяті.");
+            return;
+        }
+
+        System.out.println("\nОпції:");
+        System.out.println("C - take a book");
+        System.out.println("X - return to main menu");
+        System.out.print("\nyour chose: ");
+
+        String choice = scanner.nextLine().trim().toUpperCase();
+
+        if (choice.equals("C")) {
+            checkOutBook();
+        }
+    }
+
+    private static void checkOutBook() {
+        System.out.print("\nenter your name: ");
+        String name = scanner.nextLine().trim();
+
+        if (name.isEmpty()) {
+            System.out.println("ir can't be empty!");
+            return;
+        }
+
+        System.out.print("enter ID: ");
+        String idInput = scanner.nextLine().trim();
+
+        try {
+            int bookId = Integer.parseInt(idInput);
+            Book book = findBookById(bookId);
+
+            if (book == null) {
+                System.out.println("NOT FOUND!");
+            } else if (book.isCheckedOut()) {
+                System.out.println("It is used: " + book.getCheckedOutTo());
+            } else {
+                book.checkedOut(name);
+                System.out.println("\n✓ BOOK! \"" + book.getTitle() + "\" taken by " + name);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("not correct id.");
+        }
+    }
+
+    private static void showCheckedOutBooks() {
+        System.out.println("\n========================================");
+        System.out.println("         Taken book");
+        System.out.println("========================================");
+
+        int checkedOutCount = 0;
+        for (Book book : inventory) {
+            if (book.isCheckedOut()) {
+                System.out.printf("%d. [ISBN: %s] %s\n   → taken: %s\n",
+                        book.getId(), book.getIsbn(), book.getTitle(), book.getCheckedOutTo());
+                checkedOutCount++;
+            }
+        }
+
+        System.out.println("\nsummary: " + checkedOutCount);
+
+        if (checkedOutCount == 0) {
+            System.out.println("no taken book.");
+            return;
+        }
+
+        System.out.println("\nОпції:");
+        System.out.println("C - return the book");
+        System.out.println("X - to the main menu");
+        System.out.print("\nyour chose: ");
+
+        String choice = scanner.nextLine().trim().toUpperCase();
+
+        if (choice.equals("C")) {
+            checkInBook();
+        }
+    }
+
+    private static void checkInBook() {
+        System.out.print("\nenter id of the book you want to return: ");
+        String idInput = scanner.nextLine().trim();
+
+        try {
+            int bookId = Integer.parseInt(idInput);
+            Book book = findBookById(bookId);
+
+            if (book == null) {
+                System.out.println("not found!");
+            } else if (!book.isCheckedOut()) {
+                System.out.println("not taken.");
+            } else {
+                String previousOwner = book.getCheckedOutTo();
+                book.checkedIn();
+                System.out.println("\n✓ book \"" + book.getTitle() + "\" checked out to " + previousOwner);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("not correct id.");
+        }
+    }
+
+    private static Book findBookById(int id) {
+        for (Book book : inventory) {
+            if (book.getId() == id) {
+                return book;
+            }
+        }
+        return null;
+    }
+}
